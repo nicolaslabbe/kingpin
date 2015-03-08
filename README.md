@@ -1,3 +1,11 @@
+__My Edit__
+
+#Add variable typeEl to KPAnnotation class
+
+I edited KPAnnotation.m & KPAnnotation.h to add one more properties to this custom annotation class
+
+__End of My Edit__
+
 # kingpin
 
 A drop-in MKAnnotation clustering library for iOS.
