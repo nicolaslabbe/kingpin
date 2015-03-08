@@ -24,6 +24,7 @@
 
 @property (copy, nonatomic) NSString *title;
 @property (copy, nonatomic) NSString *subtitle;
+@property (copy, nonatomic) NSString* typeEL;
 
 @property (strong, readonly, nonatomic) NSSet *annotations;
 
