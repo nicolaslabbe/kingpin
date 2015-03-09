@@ -24,12 +24,15 @@
 
 @property (copy, nonatomic) NSString *title;
 @property (copy, nonatomic) NSString *subtitle;
-@property (copy, nonatomic) NSString* typeEL;
+
+// additionnal array to spend any data, usefull to get them back in the mapView func
+@property (copy, nonatomic) NSMutableDictionary* additionnalDatas;
 
 @property (strong, readonly, nonatomic) NSSet *annotations;
 
 - (id)initWithAnnotations:(NSArray *)annotations;
 - (id)initWithAnnotationSet:(NSSet *)set;
+
 
 // returns NO if the KPAnnotation only contains one annotation
 - (BOOL)isCluster;

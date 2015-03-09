@@ -23,31 +23,37 @@
 @property (strong, readwrite, nonatomic) NSSet *annotations;
 @property (assign, readwrite, nonatomic) float radius;
 
+@property (nonatomic) NSString * imageName;
+
 @end
 
 @implementation KPAnnotation
+
+@synthesize imageName = _imageName;
 
 - (id)initWithAnnotations:(NSArray *)annotations {
     return [self initWithAnnotationSet:[NSSet setWithArray:annotations]];
 }
 
 - (id)initWithAnnotationSet:(NSSet *)set {
+    
     self = [super init];
     
     if (self == nil) {
         return nil;
     }
-
+    
     self.annotations = set;
-    self.title = [NSString stringWithFormat:@"%lu things", (unsigned long)[self.annotations count]];;
+    self.title = [NSString stringWithFormat:@"%lu things", (unsigned long)[self.annotations count]];
     [self calculateValues];
     
     NSUInteger count = self.annotations.count;
     
+    // if there is only one annotation, set additionnal datas
     if (count == 1) {
-        self.typeEL = [[[self annotations] anyObject] typeEL];
+        self.additionnalDatas = [[[self annotations] anyObject] additionnalDatas];
     }
-
+    
     return self;
 }
 
@@ -59,30 +65,30 @@
 
 - (void)calculateValues {
     NSUInteger count = self.annotations.count;
-
+    
     if (count == 0) {
         return;
     }
-
+    
     if (count == 1) {
         self.radius = 0;
         self.coordinate = [[[self annotations] anyObject] coordinate];
-
+        
         return;
     }
-
+    
     CLLocationDegrees minLat = NSIntegerMax;
     CLLocationDegrees minLng = NSIntegerMax;
     CLLocationDegrees maxLat = NSIntegerMin;
     CLLocationDegrees maxLng = NSIntegerMin;
-
+    
     CLLocationDegrees totalLat = 0;
     CLLocationDegrees totalLng = 0;
-
+    
     NSUInteger idx = 0;
     CLLocationCoordinate2D coords[2];
-
-    /* 
+    
+    /*
      This algorithm is approx. 1.2-2x faster than naive one.
      It is described here: https://github.com/EvgenyKarkan/EKAlgorithms/issues/30
      */
@@ -90,18 +96,18 @@
         // Machine way of doing odd/even check is better than mathematical count % 2
         if (((idx++) & 1) == 0) {
             coords[0] = ithAnnotation.coordinate;
-
+            
             continue;
         } else {
             coords[1] = ithAnnotation.coordinate;
         }
-
+        
         CLLocationDegrees ithLatitude      = coords[0].latitude;
         CLLocationDegrees iplus1thLatitude = coords[1].latitude;
-
+        
         CLLocationDegrees ithLongitude      = coords[0].longitude;
         CLLocationDegrees iplus1thLongitude = coords[1].longitude;
-
+        
         if (ithLatitude < iplus1thLatitude) {
             minLat = MIN(minLat, ithLatitude);
             maxLat = MAX(maxLat, iplus1thLatitude);
@@ -114,7 +120,7 @@
             minLat = MIN(minLat, ithLatitude);
             maxLat = MAX(maxLat, ithLatitude);
         }
-
+        
         if (ithLongitude < iplus1thLongitude) {
             minLng = MIN(minLng, ithLongitude);
             maxLng = MAX(maxLng, iplus1thLongitude);
@@ -127,30 +133,30 @@
             minLng = MIN(minLng, ithLongitude);
             maxLng = MAX(maxLng, ithLongitude);
         }
-
+        
         totalLat += (ithLatitude + iplus1thLatitude);
         totalLng += (ithLongitude + iplus1thLongitude);
     }
-
+    
     // If self.annotations has odd number elements we have unpaired last annotation coordinate values in coords[0]
     BOOL isOdd = count & 1;
-
+    
     if (isOdd == 1) {
         CLLocationDegrees lastElementLatitude  = coords[0].latitude;
         CLLocationDegrees lastElementLongitude = coords[1].longitude;
-
+        
         minLat = MIN(minLat, lastElementLatitude);
         minLng = MIN(minLng, lastElementLongitude);
         maxLat = MAX(maxLat, lastElementLatitude);
         maxLng = MAX(maxLng, lastElementLongitude);
-
+        
         totalLat += lastElementLatitude;
         totalLng += lastElementLongitude;
     }
-
+    
     self.coordinate = CLLocationCoordinate2DMake(totalLat / self.annotations.count,
                                                  totalLng / self.annotations.count);
-
+    
     self.radius = MKMetersBetweenMapPoints(MKMapPointForCoordinate(CLLocationCoordinate2DMake(minLat, minLng)),
                                            MKMapPointForCoordinate(CLLocationCoordinate2DMake(maxLat, maxLng))) / 2.f;
 }
