@@ -23,13 +23,16 @@
 #import "KPGridClusteringAlgorithm.h"
 
 #import "NSArray+KP.h"
+#import "KPMKMapView.h"
+
+#define MERCATOR_RADIUS 85445659.44705395
+#define MAX_GOOGLE_LEVELS 20
 
 typedef NS_ENUM(NSInteger, KPClusteringControllerMapViewportChangeState) {
     KPClusteringControllerMapViewportNoChange,
     KPClusteringControllerMapViewportPan,
     KPClusteringControllerMapViewportZoom
 };
-
 
 @interface KPClusteringController()
 
@@ -184,7 +187,9 @@ typedef NS_ENUM(NSInteger, KPClusteringControllerMapViewportChangeState) {
 
     BOOL clusteringEnabled = YES;
 
-    if ([self.delegate respondsToSelector:@selector(clusteringControllerShouldClusterAnnotations:)]) {
+    if(self.mapView.getZoomLevel > 17) {
+        clusteringEnabled = NO;
+    }else if ([self.delegate respondsToSelector:@selector(clusteringControllerShouldClusterAnnotations:)]) {
         clusteringEnabled = [self.delegate clusteringControllerShouldClusterAnnotations:self];
     }
 
